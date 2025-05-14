@@ -238,6 +238,34 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 19,
+    name: "Cake",
+    description: "A piece of Cake",
+    boardSetup: [
+      [1, 1, 1, 0, 0],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 1, 1],
+      [0, 0, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 20,
+    name: "T-shape",
+    description: "T away",
+    boardSetup: [
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [1, 2, 2, 2, 2, 2, 1],
+      [1, 1, 1, 2, 1, 1, 1],
+      [1, 1, 1, 2, 1, 1, 1],
+      [0, 0, 1, 2, 1, 0, 0],
+      [0, 0, 1, 2, 1, 0, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 
