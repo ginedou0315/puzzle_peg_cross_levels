@@ -224,7 +224,7 @@ export const levels = [
     targetPegsRemaining: 1,
   },
   {
-    id: 13,
+    id: 18,
     name: "Two Squares",
     description: "connect the 2 squares",
     boardSetup: [
