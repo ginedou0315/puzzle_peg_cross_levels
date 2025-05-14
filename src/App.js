@@ -26,7 +26,7 @@ function App() {
       </main>
       <footer>
         <p>
-          <small>Game developed with React</small>
+          <small>Game developed by Ginelle Doubek with React</small>
         </p>
       </footer>
     </div>
