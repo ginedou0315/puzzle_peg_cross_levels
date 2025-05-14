@@ -184,6 +184,20 @@ export const levels = [
   },
   {
     id: 15,
+    name: "Hammer",
+    description: "Hammer away each peg",
+    boardSetup: [
+      [1, 1, 1, 1, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 1, 2, 1, 1],
+      [1, 1, 2, 1, 1],
+      [0, 1, 1, 1, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 16,
     name: "Branch",
     description: "Branch out the game",
     boardSetup: [
