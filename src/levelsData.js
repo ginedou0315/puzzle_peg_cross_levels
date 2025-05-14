@@ -142,6 +142,18 @@ export const levels = [
   },
   {
     id: 12,
+    name: "Point Right",
+    description: "Point the right direction",
+    boardSetup: [
+      [1, 1, 1, 1, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 1, 1],
+      [1, 1, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 13,
     name: "Letter X",
     description: "X game to play",
     boardSetup: [
@@ -156,7 +168,7 @@ export const levels = [
     targetPegsRemaining: 1,
   },
   {
-    id: 13,
+    id: 14,
     name: "Spoon",
     description: "Spoon feeds...",
     boardSetup: [
@@ -171,7 +183,7 @@ export const levels = [
     targetPegsRemaining: 1,
   },
   {
-    id: 14,
+    id: 15,
     name: "3x4",
     description: "3x4 to the game",
     boardSetup: [
@@ -183,7 +195,7 @@ export const levels = [
     targetPegsRemaining: 1,
   },
   {
-    id: 15,
+    id: 16,
     name: "Hammer",
     description: "Hammer away each peg",
     boardSetup: [
@@ -197,7 +209,7 @@ export const levels = [
     targetPegsRemaining: 1,
   },
   {
-    id: 16,
+    id: 17,
     name: "Branch",
     description: "Branch out the game",
     boardSetup: [
@@ -211,18 +223,7 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
-  {
-    id: 17,
-    name: "Point Right",
-    description: "Point the right direction",
-    boardSetup: [
-      [1, 1, 1, 1, 1],
-      [1, 2, 2, 2, 1],
-      [1, 2, 2, 1, 1],
-      [1, 1, 1, 1, 1],
-    ],
-    targetPegsRemaining: 1,
-  },
+
   // ... up to 25+ levels
 ];
 
