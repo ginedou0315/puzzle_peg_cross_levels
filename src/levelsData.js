@@ -15,7 +15,7 @@ export const levels = [
     id: 2,
     name: "Simple Line",
     description: "Clear the line. Leave one peg.",
-    boardSetup: [[2, 2, 1, 2, 2]],
+    boardSetup: [[2, 2, 1, 2, 1]],
     targetPegsRemaining: 1,
   },
   {
@@ -23,9 +23,9 @@ export const levels = [
     name: "Small Cross",
     description: "A classic shape, miniaturized.",
     boardSetup: [
-      [0, 2, 0],
+      [1, 2, 2],
       [2, 1, 2],
-      [0, 2, 0],
+      [1, 2, 1],
     ],
     targetPegsRemaining: 1,
   },
@@ -34,9 +34,9 @@ export const levels = [
     name: "The L-Shape",
     description: "Master the L. Leave one peg.",
     boardSetup: [
-      [2, 0, 0],
-      [2, 0, 0],
-      [2, 1, 2],
+      [2, 1, 1, 1],
+      [2, 2, 1, 1],
+      [1, 2, 1, 2],
     ],
     targetPegsRemaining: 1,
   },
