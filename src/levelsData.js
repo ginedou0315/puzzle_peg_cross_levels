@@ -128,6 +128,33 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 11,
+    name: "Worm",
+    description: "Wiggle Wiggle Worm",
+    boardSetup: [
+      [1, 2, 1, 1],
+      [2, 2, 1, 1],
+      [1, 2, 1, 1],
+      [1, 2, 2, 2],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 12,
+    name: "Letter X",
+    description: "X game to play",
+    boardSetup: [
+      [0, 0, 1, 0, 0],
+      [0, 2, 1, 2, 0],
+      [1, 2, 1, 2, 1],
+      [1, 1, 2, 1, 1],
+      [1, 2, 1, 2, 1],
+      [0, 2, 1, 2, 0],
+      [0, 0, 1, 0, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 
