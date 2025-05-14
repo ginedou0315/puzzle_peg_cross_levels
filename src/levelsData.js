@@ -155,6 +155,48 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 13,
+    name: "Spoon",
+    description: "Spoon feeds...",
+    boardSetup: [
+      [1, 1, 1, 1, 1],
+      [1, 1, 2, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 2, 1, 2, 1],
+      [1, 1, 2, 1, 1],
+      [1, 1, 2, 1, 1],
+      [1, 1, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 14,
+    name: "3x4",
+    description: "3x4 to the game",
+    boardSetup: [
+      [2, 2, 2],
+      [1, 2, 2],
+      [2, 2, 2],
+      [2, 2, 2],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 15,
+    name: "Branch",
+    description: "Branch out the game",
+    boardSetup: [
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [1, 1, 1, 1, 2, 1, 1],
+      [2, 2, 2, 2, 2, 2, 2],
+      [1, 1, 1, 2, 1, 1, 1],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 
