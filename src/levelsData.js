@@ -211,6 +211,18 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 17,
+    name: "Point Right",
+    description: "Point the right direction",
+    boardSetup: [
+      [1, 1, 1, 1, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 1, 1],
+      [1, 1, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 
