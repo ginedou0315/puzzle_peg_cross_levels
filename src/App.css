@@ -63,7 +63,7 @@ body {
 }
 
 .app-container {
-  background-color: #ffd486;
+  background-color: rgb(207, 235, 115);
   padding: 25px 30px;
   border-radius: 12px;
   box-shadow: 0 8px 25px var(--container-shadow);
