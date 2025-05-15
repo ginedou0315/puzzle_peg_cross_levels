@@ -1,9 +1,11 @@
+// src/components/GameControls.js
 import React from "react";
 
 function GameControls({
   onReset,
-  onUndo, // New prop
-  canUndo, // New prop
+  onUndo,
+  canUndo,
+  undoButtonText, // New prop for dynamic text
   onNextLevel,
   canGoNext,
   isGameWon,
@@ -13,9 +15,7 @@ function GameControls({
     <div className="game-controls">
       <button onClick={onReset}>Reset Level</button>
       <button onClick={onUndo} disabled={!canUndo}>
-        {" "}
-        {/* Add Undo Button */}
-        Undo Move
+        {undoButtonText} {/* Use dynamic text */}
       </button>
       {isGameWon && !allLevelsCompleted && (
         <button onClick={onNextLevel} disabled={!canGoNext}>

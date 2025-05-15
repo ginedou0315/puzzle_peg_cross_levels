@@ -184,3 +184,66 @@ body {
   border-color: #3498db;
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-around; /* Or center, space-between */
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  min-width: 120px;
+}
+
+.modal-actions .button-primary {
+  background-color: #2ecc71; /* Green for primary action */
+  color: white;
+}
+.modal-actions .button-primary:hover {
+  background-color: #27ae60;
+}
+
+.modal-actions button:not(.button-primary) {
+  background-color: #e0e0e0; /* Grey for cancel/secondary */
+  color: #333;
+}
+.modal-actions button:not(.button-primary):hover {
+  background-color: #c7c7c7;
+}

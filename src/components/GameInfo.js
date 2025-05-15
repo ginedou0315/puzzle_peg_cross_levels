@@ -1,5 +1,7 @@
+// src/components/GameInfo.js
 import React from "react";
 
+// Remove freeUndosRemaining from props
 function GameInfo({ levelName, levelDescription, pegsRemaining, movesCount }) {
   return (
     <div className="game-info">
@@ -15,6 +17,7 @@ function GameInfo({ levelName, levelDescription, pegsRemaining, movesCount }) {
       <p>
         Moves: <strong>{movesCount}</strong>
       </p>
+      {/* <p>Free Undos Left: <strong>{freeUndosRemaining}</strong></p> REMOVE THIS LINE */}
     </div>
   );
 }

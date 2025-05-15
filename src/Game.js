@@ -1,22 +1,30 @@
+// src/Game.js
 import React, { useState, useEffect, useCallback } from "react";
-import { levels as allLevels } from "./levelsData";
-import Board from "./components/Board";
-import GameInfo from "./components/GameInfo";
-import GameControls from "./components/GameControls";
+import { levels as allLevels } from "./levelsData"; // Ensure this import is correct
+import Board from "./components/Board"; // Ensure this import is correct
+import GameInfo from "./components/GameInfo"; // Ensure this import is correct
+import GameControls from "./components/GameControls"; // Ensure this import is correct
 
-function Game({ currentLevelIndex, setCurrentLevelIndex }) {
+function Game({
+  currentLevelIndex,
+  setCurrentLevelIndex,
+  globalFreeUndosRemaining, // Prop from App.js
+  onConsumeGlobalUndo, // Prop from App.js
+  onPurchaseGlobalUndos, // Prop from App.js
+}) {
   const [currentLevelData, setCurrentLevelData] = useState(null);
-  const [board, setBoard] = useState([]);
-  const [selectedPeg, setSelectedPeg] = useState(null);
+  const [board, setBoard] = useState([]); // 0: non-playable, 1: empty, 2: peg
+  const [selectedPeg, setSelectedPeg] = useState(null); // {row, col}
   const [pegsRemaining, setPegsRemaining] = useState(0);
   const [movesCount, setMovesCount] = useState(0);
   const [isGameWon, setIsGameWon] = useState(false);
-  const [isGameLost, setIsGameLost] = useState(false);
+  const [isGameLost, setIsGameLost] = useState(false); // Stuck
   const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [history, setHistory] = useState([]); // <-- New state for undo
+  const [history, setHistory] = useState([]);
+  const [showPurchaseUndoModal, setShowPurchaseUndoModal] = useState(false);
 
   const initializeLevel = useCallback((levelIndex) => {
-    const level = allLevels[levelIndex];
+    const level = allLevels[levelIndex]; // Uses allLevels
     if (!level) {
       setFeedbackMessage("Error: Level data not found!");
       setCurrentLevelData(null);
@@ -44,28 +52,28 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
       level.description ||
         `Level ${level.id}: Try to leave ${level.targetPegsRemaining} peg(s).`
     );
-    setHistory([]); // <-- Reset history on new level
-  }, []);
+    setHistory([]);
+    setShowPurchaseUndoModal(false);
+  }, []); // Added initializeLevel to dependency array (implicit from usage)
 
   useEffect(() => {
     if (currentLevelIndex < allLevels.length) {
+      // Uses allLevels
       initializeLevel(currentLevelIndex);
     } else {
       setFeedbackMessage("Congratulations! You've completed all levels!");
       setIsGameWon(true);
       setCurrentLevelData(null);
       setBoard([]);
-      setHistory([]); // Also clear history here
+      setHistory([]);
     }
   }, [currentLevelIndex, initializeLevel]);
 
   const canAnyPegMove = useCallback(() => {
-    // ... (no changes to this function)
     if (!board || board.length === 0) return false;
     for (let r = 0; r < board.length; r++) {
       for (let c = 0; c < board[r].length; c++) {
         if (board[r][c] === 2) {
-          // If there's a peg
           const directions = [
             [-2, 0],
             [2, 0],
@@ -75,8 +83,8 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
           for (const [dr, dc] of directions) {
             const nr = r + dr;
             const nc = c + dc;
-            const jr = r + dr / 2; // Jumped peg row
-            const jc = c + dc / 2; // Jumped peg col
+            const jr = r + dr / 2;
+            const jc = c + dc / 2;
 
             if (
               nr >= 0 &&
@@ -100,7 +108,6 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   }, [board]);
 
   useEffect(() => {
-    // ... (no changes to this function's core logic for win/loss)
     if (!currentLevelData || board.length === 0 || isGameWon || isGameLost)
       return;
 
@@ -118,7 +125,6 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
       !canAnyPegMove() &&
       pegsRemaining > currentLevelData.targetPegsRemaining
     ) {
-      // Added condition
       setIsGameLost(true);
       setFeedbackMessage(
         "No more moves available. Try resetting the level or undo."
@@ -153,15 +159,17 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
         (Math.abs(dRow) === 2 && dCol === 0) ||
         (Math.abs(dCol) === 2 && dRow === 0)
       ) {
-        const jumpedRow = fromRow + dRow / 2;
-        const jumpedCol = fromCol + dCol / 2;
+        const jumpedRow = fromRow + dRow / 2; // Definition
+        const jumpedCol = fromCol + dCol / 2; // Definition
 
-        if (board[jumpedRow] && board[jumpedRow][jumpedCol] === 2) {
-          // <-- Save current state to history BEFORE making the move
+        if (
+          board[jumpedRow] && // Uses jumpedRow
+          board[jumpedRow][jumpedCol] === 2 // Uses jumpedRow and jumpedCol
+        ) {
           setHistory((prevHistory) => [
             ...prevHistory,
             {
-              board: board.map((r) => [...r]), // Deep copy of current board
+              board: board.map((r) => [...r]),
               pegsRemaining: pegsRemaining,
               movesCount: movesCount,
             },
@@ -177,8 +185,6 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
           setMovesCount((prev) => prev + 1);
           setSelectedPeg(null);
           setFeedbackMessage("Nice jump!");
-          // After a successful move, game might be won/lost, so clear these flags
-          // The useEffect for win/loss will re-evaluate
           setIsGameWon(false);
           setIsGameLost(false);
         } else {
@@ -201,11 +207,14 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   };
 
   const handleResetLevel = () => {
-    initializeLevel(currentLevelIndex); // This already resets history
+    // Definition
+    initializeLevel(currentLevelIndex);
   };
 
   const handleNextLevel = () => {
+    // Definition
     if (currentLevelIndex < allLevels.length - 1) {
+      // Uses allLevels
       setCurrentLevelIndex((prev) => prev + 1);
     } else {
       setFeedbackMessage("Congratulations! You've completed all levels!");
@@ -213,26 +222,36 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   };
 
   const handleUndoMove = () => {
-    // <-- New Undo function
     if (history.length === 0) {
       setFeedbackMessage("No moves to undo.");
       return;
     }
 
-    const lastState = history[history.length - 1];
-    setBoard(lastState.board.map((r) => [...r])); // Restore board (deep copy)
-    setPegsRemaining(lastState.pegsRemaining);
-    setMovesCount(lastState.movesCount);
-
-    setHistory((prevHistory) => prevHistory.slice(0, -1)); // Remove last state from history
-    setSelectedPeg(null);
-    setIsGameWon(false); // Game is no longer won/lost after undo
-    setIsGameLost(false);
-    setFeedbackMessage("Last move undone.");
+    if (globalFreeUndosRemaining > 0) {
+      const consumed = onConsumeGlobalUndo();
+      if (consumed) {
+        const lastState = history[history.length - 1];
+        setBoard(lastState.board.map((r) => [...r]));
+        setPegsRemaining(lastState.pegsRemaining);
+        setMovesCount(lastState.movesCount);
+        setHistory((prevHistory) => prevHistory.slice(0, -1));
+        setSelectedPeg(null);
+        setIsGameWon(false);
+        setIsGameLost(false);
+        setFeedbackMessage(
+          `Last move undone. Global free undos remaining: ${
+            globalFreeUndosRemaining - 1
+          }`
+        );
+      }
+    } else {
+      setShowPurchaseUndoModal(true);
+      setFeedbackMessage("Out of global free undos!");
+    }
   };
 
   if (!currentLevelData && currentLevelIndex >= allLevels.length) {
-    // ... (All levels complete message - no change)
+    // Uses allLevels
     return (
       <div className="all-levels-complete">
         <h1>Amazing!</h1>
@@ -255,41 +274,76 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   }
 
   const getFeedbackClass = () => {
-    // ... (no changes)
+    // Definition
     if (isGameWon) return "success";
     if (isGameLost) return "error";
     if (selectedPeg) return "info";
     return "info";
   };
 
+  const canUndo = history.length > 0 && !isGameWon && !isGameLost;
+  const undoButtonText =
+    globalFreeUndosRemaining > 0
+      ? `Undo (${globalFreeUndosRemaining})`
+      : history.length > 0
+      ? "Get Undos"
+      : "Undo";
+
   return (
     <div className="game-area">
-      <GameInfo
+      <GameInfo // Uses GameInfo
         levelName={`Level ${currentLevelData.id}: ${currentLevelData.name}`}
         levelDescription={currentLevelData.description}
         pegsRemaining={pegsRemaining}
         movesCount={movesCount}
       />
-      <Board
+      <Board // Uses Board
         boardState={board}
         selectedPeg={selectedPeg}
         onCellClick={handleCellClick}
       />
-      <GameControls
-        onReset={handleResetLevel}
-        onUndo={handleUndoMove} // <-- Pass new handler
-        canUndo={history.length > 0 && !isGameWon && !isGameLost} // <-- Condition for enabling undo
-        onNextLevel={handleNextLevel}
+      <GameControls // Uses GameControls
+        onReset={handleResetLevel} // Uses handleResetLevel
+        onUndo={handleUndoMove}
+        canUndo={canUndo}
+        undoButtonText={undoButtonText}
+        onNextLevel={handleNextLevel} // Uses handleNextLevel
         canGoNext={isGameWon}
         isGameWon={isGameWon}
         allLevelsCompleted={
           currentLevelIndex >= allLevels.length - 1 && isGameWon
-        }
+        } // Uses allLevels
       />
       {feedbackMessage && (
         <p className={`feedback-message ${getFeedbackClass()}`}>
+          {" "}
+          {/* Uses getFeedbackClass */}
           {feedbackMessage}
         </p>
+      )}
+
+      {showPurchaseUndoModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Need More Undos?</h3>
+            <p>You've used all your global free undos.</p>
+            <p>(This is a placeholder for a real purchase feature)</p>
+            <div className="modal-actions">
+              <button
+                onClick={() => {
+                  onPurchaseGlobalUndos();
+                  setShowPurchaseUndoModal(false);
+                }}
+                className="button-primary"
+              >
+                "Buy" More Undos
+              </button>
+              <button onClick={() => setShowPurchaseUndoModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
