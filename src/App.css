@@ -88,7 +88,7 @@ body {
   display: grid;
   margin: 25px auto;
   border: 3px solid var(--board-border);
-  background-color: var(--board-bg);
+  background-color: blue;
   width: fit-content;
   border-radius: 8px; /* Slightly rounded board */
   padding: 5px; /* Padding inside the border before cells start */
