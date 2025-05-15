@@ -281,6 +281,60 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 22,
+    name: "Elbow",
+    description: "Elbow is the name of the game",
+    boardSetup: [
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 2, 0, 0],
+      [0, 0, 2, 2, 2, 0, 0],
+      [0, 0, 2, 2, 2, 0, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 23,
+    name: "U-shape",
+    description: "Elbow is the name of the game",
+    boardSetup: [
+      [1, 1, 1, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 2, 1, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 1, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 24,
+    name: "Bench",
+    description: "Sit and relax",
+    boardSetup: [
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [1, 1, 2, 2, 2, 1, 1],
+      [1, 2, 2, 2, 2, 2, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
+  {
+    id: 25,
+    name: "Arrow",
+    description: "Target your Arrow",
+    boardSetup: [
+      [0, 0, 1, 2, 1, 0, 0],
+      [0, 0, 1, 2, 1, 0, 0],
+      [2, 2, 1, 2, 1, 2, 2],
+      [1, 2, 2, 2, 2, 2, 1],
+      [1, 1, 2, 2, 2, 1, 1],
+      [0, 0, 1, 2, 1, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 

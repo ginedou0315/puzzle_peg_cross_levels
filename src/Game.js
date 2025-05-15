@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { levels as allLevels } from "./levelsData"; // Corrected import
+import { levels as allLevels } from "./levelsData";
 import Board from "./components/Board";
 import GameInfo from "./components/GameInfo";
 import GameControls from "./components/GameControls";
@@ -13,6 +13,7 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   const [isGameWon, setIsGameWon] = useState(false);
   const [isGameLost, setIsGameLost] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [history, setHistory] = useState([]); // <-- New state for undo
 
   const initializeLevel = useCallback((levelIndex) => {
     const level = allLevels[levelIndex];
@@ -43,10 +44,9 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
       level.description ||
         `Level ${level.id}: Try to leave ${level.targetPegsRemaining} peg(s).`
     );
-  }, []); // Dependencies for useCallback
+    setHistory([]); // <-- Reset history on new level
+  }, []);
 
-  // ... the rest of your Game.js file remains the same
-  // useEffect for initializeLevel based on currentLevelIndex
   useEffect(() => {
     if (currentLevelIndex < allLevels.length) {
       initializeLevel(currentLevelIndex);
@@ -55,15 +55,17 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
       setIsGameWon(true);
       setCurrentLevelData(null);
       setBoard([]);
+      setHistory([]); // Also clear history here
     }
-  }, [currentLevelIndex, initializeLevel]); // Added initializeLevel to dependency array
+  }, [currentLevelIndex, initializeLevel]);
 
-  // canAnyPegMove function
   const canAnyPegMove = useCallback(() => {
+    // ... (no changes to this function)
     if (!board || board.length === 0) return false;
     for (let r = 0; r < board.length; r++) {
       for (let c = 0; c < board[r].length; c++) {
         if (board[r][c] === 2) {
+          // If there's a peg
           const directions = [
             [-2, 0],
             [2, 0],
@@ -73,8 +75,8 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
           for (const [dr, dc] of directions) {
             const nr = r + dr;
             const nc = c + dc;
-            const jr = r + dr / 2;
-            const jc = c + dc / 2;
+            const jr = r + dr / 2; // Jumped peg row
+            const jc = c + dc / 2; // Jumped peg col
 
             if (
               nr >= 0 &&
@@ -97,8 +99,8 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
     return false;
   }, [board]);
 
-  // useEffect for game win/loss logic
   useEffect(() => {
+    // ... (no changes to this function's core logic for win/loss)
     if (!currentLevelData || board.length === 0 || isGameWon || isGameLost)
       return;
 
@@ -112,9 +114,15 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
         setIsGameLost(true);
         setFeedbackMessage("Oh no! Too few pegs left and no more moves.");
       }
-    } else if (!canAnyPegMove()) {
+    } else if (
+      !canAnyPegMove() &&
+      pegsRemaining > currentLevelData.targetPegsRemaining
+    ) {
+      // Added condition
       setIsGameLost(true);
-      setFeedbackMessage("No more moves available. Try resetting the level.");
+      setFeedbackMessage(
+        "No more moves available. Try resetting the level or undo."
+      );
     }
   }, [
     pegsRemaining,
@@ -149,6 +157,16 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
         const jumpedCol = fromCol + dCol / 2;
 
         if (board[jumpedRow] && board[jumpedRow][jumpedCol] === 2) {
+          // <-- Save current state to history BEFORE making the move
+          setHistory((prevHistory) => [
+            ...prevHistory,
+            {
+              board: board.map((r) => [...r]), // Deep copy of current board
+              pegsRemaining: pegsRemaining,
+              movesCount: movesCount,
+            },
+          ]);
+
           const newBoard = board.map((r) => [...r]);
           newBoard[fromRow][fromCol] = 1;
           newBoard[jumpedRow][jumpedCol] = 1;
@@ -159,6 +177,10 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
           setMovesCount((prev) => prev + 1);
           setSelectedPeg(null);
           setFeedbackMessage("Nice jump!");
+          // After a successful move, game might be won/lost, so clear these flags
+          // The useEffect for win/loss will re-evaluate
+          setIsGameWon(false);
+          setIsGameLost(false);
         } else {
           setFeedbackMessage(
             "Invalid jump: No peg to jump over, or invalid path."
@@ -179,7 +201,7 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   };
 
   const handleResetLevel = () => {
-    initializeLevel(currentLevelIndex);
+    initializeLevel(currentLevelIndex); // This already resets history
   };
 
   const handleNextLevel = () => {
@@ -190,7 +212,27 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
     }
   };
 
+  const handleUndoMove = () => {
+    // <-- New Undo function
+    if (history.length === 0) {
+      setFeedbackMessage("No moves to undo.");
+      return;
+    }
+
+    const lastState = history[history.length - 1];
+    setBoard(lastState.board.map((r) => [...r])); // Restore board (deep copy)
+    setPegsRemaining(lastState.pegsRemaining);
+    setMovesCount(lastState.movesCount);
+
+    setHistory((prevHistory) => prevHistory.slice(0, -1)); // Remove last state from history
+    setSelectedPeg(null);
+    setIsGameWon(false); // Game is no longer won/lost after undo
+    setIsGameLost(false);
+    setFeedbackMessage("Last move undone.");
+  };
+
   if (!currentLevelData && currentLevelIndex >= allLevels.length) {
+    // ... (All levels complete message - no change)
     return (
       <div className="all-levels-complete">
         <h1>Amazing!</h1>
@@ -213,6 +255,7 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
   }
 
   const getFeedbackClass = () => {
+    // ... (no changes)
     if (isGameWon) return "success";
     if (isGameLost) return "error";
     if (selectedPeg) return "info";
@@ -234,6 +277,8 @@ function Game({ currentLevelIndex, setCurrentLevelIndex }) {
       />
       <GameControls
         onReset={handleResetLevel}
+        onUndo={handleUndoMove} // <-- Pass new handler
+        canUndo={history.length > 0 && !isGameWon && !isGameLost} // <-- Condition for enabling undo
         onNextLevel={handleNextLevel}
         canGoNext={isGameWon}
         isGameWon={isGameWon}

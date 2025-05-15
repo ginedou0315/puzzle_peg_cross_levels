@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import "./App.css";
 import Game from "./Game";
-import { levels } from "./levelsData"; // To know the total number of levels
+import LevelSelector from "./components/LevelSelector"; // Import LevelSelector
+import { levels } from "./levelsData"; // Import levels data
 
 function App() {
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+
+  const handleLevelSelect = (levelIndex) => {
+    if (levelIndex >= 0 && levelIndex < levels.length) {
+      setCurrentLevelIndex(levelIndex);
+    }
+  };
 
   return (
     <div className="app-container">
@@ -12,21 +19,22 @@ function App() {
         <h1 className="game-title">Peg Puzzle Cross - Levels Challenge</h1>
       </header>
       <main>
+        <LevelSelector // Add LevelSelector component
+          levels={levels}
+          currentLevelIndex={currentLevelIndex}
+          onSelectLevel={handleLevelSelect}
+        />
         <Game
           currentLevelIndex={currentLevelIndex}
-          setCurrentLevelIndex={setCurrentLevelIndex}
+          setCurrentLevelIndex={setCurrentLevelIndex} // Pass this for next level logic
+          key={currentLevelIndex} // Add key to force re-mount of Game on level change
+          // This helps reset Game state cleanly
         />
-        {currentLevelIndex >= levels.length && (
-          // This completion message is now primarily handled within Game.js
-          // But you could have a global message here too or a level select button
-          <p style={{ marginTop: "20px", fontWeight: "bold" }}>
-            You've reached the end of the available levels!
-          </p>
-        )}
+        {/* Message for completing all levels is now primarily handled within Game.js */}
       </main>
       <footer>
         <p>
-          <small>Game developed by Ginelle Doubek with React</small>
+          <small>Game developed with React</small>
         </p>
       </footer>
     </div>

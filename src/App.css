@@ -154,3 +154,33 @@ body {
   color: #383d41;
   border: 1px solid #d6d8db;
 }
+.level-selector {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* Space between label and select */
+}
+
+.level-selector label {
+  font-weight: bold;
+  color: #333;
+}
+
+.level-selector select {
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+  background-color: white;
+  cursor: pointer;
+}
+
+.level-selector select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
