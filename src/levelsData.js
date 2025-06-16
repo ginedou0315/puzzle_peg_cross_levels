@@ -468,6 +468,20 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 35,
+    name: "Mom-Baby Square",
+    description: "its a mother and child affair",
+    boardSetup: [
+      [1, 2, 2, 2, 1, 1],
+      [1, 2, 2, 2, 1, 1],
+      [1, 2, 2, 2, 1, 1],
+      [1, 1, 1, 1, 2, 2],
+      [1, 1, 1, 1, 2, 2],
+      [1, 1, 1, 1, 1, 1],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 
