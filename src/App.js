@@ -6,11 +6,15 @@ import LevelSelector from "./components/LevelSelector";
 import { levels } from "./levelsData";
 
 const TOTAL_GLOBAL_FREE_UNDOS = 3;
+const TOTAL_GLOBAL_FREE_HAMMERS = 3;
 
 function App() {
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [globalFreeUndosRemaining, setGlobalFreeUndosRemaining] = useState(
     TOTAL_GLOBAL_FREE_UNDOS
+  );
+  const [globalHammersRemaining, setGlobalHammersRemaining] = useState(
+    TOTAL_GLOBAL_FREE_HAMMERS
   );
   const [isGameLoaded, setIsGameLoaded] = useState(false); // To prevent flicker on initial load
 
@@ -20,17 +24,30 @@ function App() {
     const savedUndos = localStorage.getItem(
       "pegPuzzle_globalFreeUndosRemaining"
     );
+    const savedHammers = localStorage.getItem(
+      "pegPuzzle_globalHammersRemaining"
+    );
 
     if (savedLevelIndex !== null) {
-      setCurrentLevelIndex(parseInt(savedLevelIndex, 10));
+      const parsedLevelIndex = parseInt(savedLevelIndex, 10);
+      // Ensure loaded level index is within bounds of available levels
+      if (parsedLevelIndex >= 0 && parsedLevelIndex < levels.length) {
+        setCurrentLevelIndex(parsedLevelIndex);
+      } else {
+        setCurrentLevelIndex(0); // Default to first level if out of bounds
+        localStorage.removeItem("pegPuzzle_currentLevelIndex"); // Clear invalid stored index
+      }
     }
     if (savedUndos !== null) {
       setGlobalFreeUndosRemaining(parseInt(savedUndos, 10));
     }
+    if (savedHammers !== null) {
+      setGlobalHammersRemaining(parseInt(savedHammers, 10));
+    }
     setIsGameLoaded(true); // Indicate that loading is complete
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
-  // Save game state to localStorage whenever currentLevelIndex or globalFreeUndosRemaining changes
+  // Save game state to localStorage whenever relevant state changes
   useEffect(() => {
     if (isGameLoaded) {
       // Only save after initial load is complete
@@ -42,14 +59,22 @@ function App() {
         "pegPuzzle_globalFreeUndosRemaining",
         globalFreeUndosRemaining.toString()
       );
+      localStorage.setItem(
+        "pegPuzzle_globalHammersRemaining",
+        globalHammersRemaining.toString()
+      );
     }
-  }, [currentLevelIndex, globalFreeUndosRemaining, isGameLoaded]);
+  }, [
+    currentLevelIndex,
+    globalFreeUndosRemaining,
+    globalHammersRemaining,
+    isGameLoaded,
+  ]);
 
   const handleLevelSelect = (levelIndex) => {
     if (levelIndex >= 0 && levelIndex < levels.length) {
       setCurrentLevelIndex(levelIndex);
-      // Optionally, reset level-specific history in Game.js if desired when manually selecting
-      // (The `key` prop on Game component already handles this by remounting)
+      // The `key` prop on Game component will handle re-mounting and re-initializing Game state
     }
   };
 
@@ -61,20 +86,32 @@ function App() {
     return false; // No free undos left to consume
   };
 
-  const handlePurchaseGlobalUndos = () => {
-    // Mock purchase: gives a certain number of undos
-    // In a real app, this would involve a payment flow
-    setGlobalFreeUndosRemaining((prev) => prev + 3); // Example: "Buy" 3 more undos
-    // Note: You might want to cap this or have different "packages"
-    alert("Mock purchase: 3 undos added!"); // Simple feedback
+  const handlePurchaseGlobalUndos = (quantity = 3) => {
+    setGlobalFreeUndosRemaining((prev) => prev + quantity);
+    alert(`Mock purchase: ${quantity} undo(s) added!`); // Simple feedback for now
+  };
+
+  const handleConsumeHammer = () => {
+    if (globalHammersRemaining > 0) {
+      setGlobalHammersRemaining((prev) => prev - 1);
+      return true; // Hammer was successfully consumed
+    }
+    return false; // No hammers left to consume
+  };
+
+  const handlePurchaseHammers = (quantity = 3) => {
+    setGlobalHammersRemaining((prev) => prev + quantity);
+    alert(`Mock purchase: ${quantity} hammer(s) added!`); // Simple feedback for now
   };
 
   if (!isGameLoaded) {
     return (
       <div className="app-container">
-        <p>Loading game...</p>
+        <p style={{ textAlign: "center", fontSize: "1.2em", padding: "50px" }}>
+          Loading game...
+        </p>
       </div>
-    ); // Or a proper loading spinner
+    );
   }
 
   return (
@@ -90,18 +127,23 @@ function App() {
         />
         <Game
           currentLevelIndex={currentLevelIndex}
-          setCurrentLevelIndex={setCurrentLevelIndex}
-          key={`${currentLevelIndex}-${globalFreeUndosRemaining}`} // Re-mount if global undos change from purchase
-          // to ensure Game component re-reads the prop
+          setCurrentLevelIndex={setCurrentLevelIndex} // To allow Game to advance levels
+          key={`${currentLevelIndex}-${globalFreeUndosRemaining}-${globalHammersRemaining}`} // Force re-mount on these key changes
           globalFreeUndosRemaining={globalFreeUndosRemaining}
           onConsumeGlobalUndo={handleConsumeGlobalUndo}
-          onPurchaseGlobalUndos={handlePurchaseGlobalUndos} // Pass this down
+          onPurchaseGlobalUndos={handlePurchaseGlobalUndos}
+          globalHammersRemaining={globalHammersRemaining}
+          onConsumeHammer={handleConsumeHammer}
+          onPurchaseHammers={handlePurchaseHammers}
         />
       </main>
       <footer>
-        <p>Global Free Undos: {globalFreeUndosRemaining}</p>
         <p>
-          <small>Game developed with React</small>
+          Global Free Undos: {globalFreeUndosRemaining} | Global Hammers:{" "}
+          {globalHammersRemaining}
+        </p>
+        <p>
+          <small>Game developed with React. Enjoy!</small>
         </p>
       </footer>
     </div>
