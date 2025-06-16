@@ -356,3 +356,75 @@ footer p {
 footer p small {
   font-size: 0.85em;
 }
+.powerup-controls {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.hammer-button {
+  background-color: #ff9800; /* Orange for hammer */
+  color: white;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  display: flex; /* If using an icon */
+  align-items: center; /* If using an icon */
+  gap: 8px; /* If using an icon */
+}
+.hammer-button:hover:not(:disabled) {
+  background-color: #f57c00; /* Darker orange */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+.hammer-button.active {
+  background-color: #e65100; /* Even darker, active state */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.hammer-button:disabled {
+  background-color: var(--button-disabled-bg);
+  color: var(--button-disabled-text-color);
+  cursor: not-allowed;
+}
+.hammer-button img {
+  /* If using an img icon */
+  width: 20px;
+  height: 20px;
+}
+
+/* Visual feedback when hammer mode is active */
+.game-area.hammer-mode-active .board {
+  /* Optional: Add a border or glow to the board */
+  /* box-shadow: 0 0 15px var(--peg-selected-color); */
+}
+.game-area.hammer-mode-active .cell.has-peg .peg {
+  cursor: crosshair; /* Change cursor over pegs in hammer mode */
+  /* Optional: Pulsing animation or border on targetable pegs */
+  /* animation: pulse-hammer-target 1.5s infinite; */
+}
+.game-area.hammer-mode-active .cell.hammer-targetable .peg:hover {
+  outline: 3px solid var(--peg-selected-color); /* Highlight peg on hover in hammer mode */
+  transform: scale(1.1);
+}
+
+/* Optional pulse animation for targetable pegs */
+@keyframes pulse-hammer-target {
+  0% {
+    box-shadow: 0 3px 6px var(--peg-shadow),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.15),
+      0 0 0 0 rgba(var(--peg-selected-color-rgb, 236, 64, 122), 0.7);
+  } /* Add RGB fallback for selected color */
+  70% {
+    box-shadow: 0 3px 6px var(--peg-shadow),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.15),
+      0 0 0 10px rgba(var(--peg-selected-color-rgb, 236, 64, 122), 0);
+  }
+  100% {
+    box-shadow: 0 3px 6px var(--peg-shadow),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.15),
+      0 0 0 0 rgba(var(--peg-selected-color-rgb, 236, 64, 122), 0);
+  }
+}

@@ -3,7 +3,7 @@ import { levels as allLevels } from "./levelsData";
 import Board from "./components/Board";
 import GameInfo from "./components/GameInfo";
 import GameControls from "./components/GameControls";
-import hammerIcon from "./assets/hammer.png";
+// import hammerIcon from "./assets/hammer.png";
 
 function Game({
   currentLevelIndex,
