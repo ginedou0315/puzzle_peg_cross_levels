@@ -482,6 +482,21 @@ export const levels = [
     ],
     targetPegsRemaining: 1,
   },
+  {
+    id: 36,
+    name: "Fence",
+    description: "jump over the fence",
+    boardSetup: [
+      [0, 1, 1, 1, 0],
+      [1, 2, 1, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 1, 2, 1],
+      [0, 1, 1, 1, 0],
+    ],
+    targetPegsRemaining: 1,
+  },
   // ... up to 25+ levels
 ];
 

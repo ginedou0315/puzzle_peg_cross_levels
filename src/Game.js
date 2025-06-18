@@ -1,9 +1,11 @@
+// src/Game.js
 import React, { useState, useEffect, useCallback } from "react";
 import { levels as allLevels } from "./levelsData";
 import Board from "./components/Board";
 import GameInfo from "./components/GameInfo";
 import GameControls from "./components/GameControls";
-// import hammerIcon from "./assets/hammer.png";
+
+const LEVEL_ATTEMPT_FREE_HAMMERS = 3; // Free hammers per level attempt
 
 function Game({
   currentLevelIndex,
@@ -11,9 +13,9 @@ function Game({
   globalFreeUndosRemaining,
   onConsumeGlobalUndo,
   onPurchaseGlobalUndos,
-  globalHammersRemaining, // Prop from App.js
-  onConsumeHammer, // Prop from App.js
-  onPurchaseHammers, // Prop from App.js
+  purchasedHammersAvailable, // Prop from App.js (purchased/bonus hammers)
+  onConsumePurchasedHammer, // Prop function from App.js
+  onPurchaseHammers, // Prop function from App.js (to buy more, adds to purchased stack)
 }) {
   const [currentLevelData, setCurrentLevelData] = useState(null);
   const [board, setBoard] = useState([]);
@@ -25,12 +27,19 @@ function Game({
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [history, setHistory] = useState([]);
   const [showPurchaseUndoModal, setShowPurchaseUndoModal] = useState(false);
-  const [isHammerModeActive, setIsHammerModeActive] = useState(false); // Hammer mode state
-  const [showPurchaseHammerModal, setShowPurchaseHammerModal] = useState(false); // Hammer purchase modal
-  // const [hammerAnimation, setHammerAnimation] = useState({ active: false, targetRow: -1, targetCol: -1 }); // For advanced animation
+  const [levelFreeHammersRemaining, setLevelFreeHammersRemaining] = useState(
+    LEVEL_ATTEMPT_FREE_HAMMERS
+  ); // State for this level attempt
+  const [isHammerModeActive, setIsHammerModeActive] = useState(false);
+  const [showPurchaseHammerModal, setShowPurchaseHammerModal] = useState(false);
 
-  const initializeLevel = useCallback((levelIndex) => {
-    const level = allLevels[levelIndex];
+  console.log(
+    `Game.js [Lvl ${currentLevelIndex}] Render. LevelFreeHammers: ${levelFreeHammersRemaining}, PurchasedHammersProp: ${purchasedHammersAvailable}, HammerMode: ${isHammerModeActive}`
+  );
+
+  const initializeLevel = useCallback((levelIdx) => {
+    console.log(`Game.js: Initializing level ${levelIdx}`);
+    const level = allLevels[levelIdx];
     if (!level) {
       setFeedbackMessage("Error: Level data not found!");
       setCurrentLevelData(null);
@@ -57,12 +66,18 @@ function Game({
     );
     setHistory([]);
     setShowPurchaseUndoModal(false);
-    setIsHammerModeActive(false); // Reset hammer mode
-    setShowPurchaseHammerModal(false); // Reset hammer purchase modal
-    // setHammerAnimation({ active: false, targetRow: -1, targetCol: -1 });
-  }, []);
+    setIsHammerModeActive(false);
+    setShowPurchaseHammerModal(false);
+    setLevelFreeHammersRemaining(LEVEL_ATTEMPT_FREE_HAMMERS); // Reset for this level attempt
+    console.log(
+      `Game.js: Level free hammers reset to ${LEVEL_ATTEMPT_FREE_HAMMERS} for level ${levelIdx}`
+    );
+  }, []); // Removed setters from deps, let React handle it based on initializeLevel identity
 
   useEffect(() => {
+    console.log(
+      `Game.js: useEffect for currentLevelIndex ${currentLevelIndex} triggered.`
+    );
     if (currentLevelIndex < allLevels.length) {
       initializeLevel(currentLevelIndex);
     } else {
@@ -71,11 +86,12 @@ function Game({
       setCurrentLevelData(null);
       setBoard([]);
       setHistory([]);
-      setIsHammerModeActive(false); // Also reset here
+      setIsHammerModeActive(false);
     }
-  }, [currentLevelIndex, initializeLevel]);
+  }, [currentLevelIndex, initializeLevel]); // initializeLevel is stable due to useCallback
 
   const canAnyPegMove = useCallback(() => {
+    /* ... (no changes needed here) ... */
     if (!board || board.length === 0) return false;
     for (let r = 0; r < board.length; r++) {
       for (let c = 0; c < board[r].length; c++) {
@@ -113,28 +129,25 @@ function Game({
   }, [board]);
 
   useEffect(() => {
+    /* ... (win/loss logic - no changes needed here) ... */
     if (!currentLevelData || board.length === 0 || isGameWon || isGameLost)
       return;
-    // Removed hammerAnimation.active from condition as basic version doesn't use it for win/loss check
-
     if (pegsRemaining === currentLevelData.targetPegsRemaining) {
       if (!canAnyPegMove()) {
         setIsGameWon(true);
-        setFeedbackMessage(`Level ${currentLevelData.id} Complete! Well done!`);
+        setFeedbackMessage(`Level ${currentLevelData.id} Complete!`);
       }
     } else if (pegsRemaining < currentLevelData.targetPegsRemaining) {
       if (!canAnyPegMove()) {
         setIsGameLost(true);
-        setFeedbackMessage("Oh no! Too few pegs left and no more moves.");
+        setFeedbackMessage("Too few pegs left.");
       }
     } else if (
       !canAnyPegMove() &&
       pegsRemaining > currentLevelData.targetPegsRemaining
     ) {
       setIsGameLost(true);
-      setFeedbackMessage(
-        "No more moves available. Try resetting the level or undo."
-      );
+      setFeedbackMessage("No more moves.");
     }
   }, [
     pegsRemaining,
@@ -146,63 +159,100 @@ function Game({
   ]);
 
   const handleCellClick = (row, col) => {
+    console.log(
+      `Game.js: Cell click [${row},${col}]. Hammer mode: ${isHammerModeActive}. Board val: ${board[row]?.[col]}`
+    );
     if (isGameWon || isGameLost || !board[row] || board[row][col] === 0) return;
 
     if (isHammerModeActive) {
       if (board[row][col] === 2) {
-        // Clicked on a peg with hammer active
-        // Placeholder for starting hammer animation:
-        // setHammerAnimation({ active: true, targetRow: row, targetCol: col });
-        // For now, directly remove the peg:
+        // Clicked on a peg
+        console.log("Game.js: Hammer targeting peg.");
+        let hammerConsumedThisTurn = false;
+        let hammerSource = "";
 
-        // Save current state to history BEFORE making the move
-        setHistory((prevHistory) => [
-          ...prevHistory,
-          { board: board.map((r) => [...r]), pegsRemaining, movesCount },
-        ]);
+        if (levelFreeHammersRemaining > 0) {
+          setLevelFreeHammersRemaining((prev) => prev - 1);
+          hammerConsumedThisTurn = true;
+          hammerSource = "level free";
+          console.log(
+            "Game.js: Consumed a level free hammer. Remaining for level:",
+            levelFreeHammersRemaining - 1
+          );
+        } else if (purchasedHammersAvailable > 0) {
+          if (onConsumePurchasedHammer()) {
+            // Call App.js to consume a purchased one
+            hammerConsumedThisTurn = true;
+            hammerSource = "purchased";
+            console.log("Game.js: Consumed a purchased hammer via App.js.");
+          } else {
+            console.error(
+              "Game.js: onConsumePurchasedHammer from App.js returned false unexpectedly."
+            );
+          }
+        } else {
+          console.log("Game.js: No hammers (level or purchased) to use.");
+          setFeedbackMessage("No hammers left. Try buying some!");
+          setIsHammerModeActive(false);
+          setShowPurchaseHammerModal(true);
+          return;
+        }
 
-        const newBoard = board.map((r) => [...r]);
-        newBoard[row][col] = 1; // Remove the peg
-        setBoard(newBoard);
-        setPegsRemaining((prev) => prev - 1);
-        // Not counting hammer as a "move" in movesCount for now
-
-        onConsumeHammer(); // Consume a hammer from App.js
-        setIsHammerModeActive(false); // Exit hammer mode after use
-        setFeedbackMessage(
-          `Peg hammered! Hammers remaining: ${globalHammersRemaining - 1}`
-        );
-        setSelectedPeg(null);
-        setIsGameWon(false); // Re-evaluate win/loss
-        setIsGameLost(false);
+        if (hammerConsumedThisTurn) {
+          // Save state BEFORE modification for undo
+          setHistory((prevHistory) => [
+            ...prevHistory,
+            {
+              board: board.map((r) => [...r]),
+              pegsRemaining,
+              movesCount,
+              levelFreeHammers:
+                levelFreeHammersRemaining -
+                (hammerSource === "level free" ? 1 : 0),
+            }, // Capture state before this hammer use
+          ]);
+          const newBoard = board.map((r) => [...r]);
+          newBoard[row][col] = 1; // Remove peg
+          setBoard(newBoard);
+          setPegsRemaining((prev) => prev - 1);
+          setIsHammerModeActive(false); // Deactivate after use
+          setFeedbackMessage(`Peg hammered using a ${hammerSource} hammer!`);
+          setSelectedPeg(null);
+          setIsGameWon(false);
+          setIsGameLost(false); // Re-evaluate win/loss
+        }
       } else {
         setFeedbackMessage("Select a peg to hammer.");
       }
       return; // Exit after hammer logic
     }
 
-    // Regular Peg Selection & Jump Logic
+    // Regular Jump Logic
     const cellValue = board[row][col];
     if (cellValue === 2) {
       setSelectedPeg({ row, col });
-      setFeedbackMessage("Peg selected. Click an empty hole to jump.");
+      setFeedbackMessage("Peg selected. Click an empty hole.");
     } else if (cellValue === 1 && selectedPeg) {
       const { row: fromRow, col: fromCol } = selectedPeg;
       const toRow = row;
       const toCol = col;
       const dRow = toRow - fromRow;
       const dCol = toCol - fromCol;
-
       if (
         (Math.abs(dRow) === 2 && dCol === 0) ||
         (Math.abs(dCol) === 2 && dRow === 0)
       ) {
         const jumpedRow = fromRow + dRow / 2;
         const jumpedCol = fromCol + dCol / 2;
-        if (board[jumpedRow] && board[jumpedRow][jumpedCol] === 2) {
+        if (board[jumpedRow]?.[jumpedCol] === 2) {
           setHistory((prevHistory) => [
             ...prevHistory,
-            { board: board.map((r) => [...r]), pegsRemaining, movesCount },
+            {
+              board: board.map((r) => [...r]),
+              pegsRemaining,
+              movesCount,
+              levelFreeHammers: levelFreeHammersRemaining,
+            },
           ]);
           const newBoard = board.map((r) => [...r]);
           newBoard[fromRow][fromCol] = 1;
@@ -216,42 +266,43 @@ function Game({
           setIsGameWon(false);
           setIsGameLost(false);
         } else {
-          setFeedbackMessage(
-            "Invalid jump: No peg to jump over, or invalid path."
-          );
+          setFeedbackMessage("Invalid jump path.");
           setSelectedPeg(null);
         }
       } else {
-        setFeedbackMessage(
-          "Invalid jump: Must jump over one peg to an empty hole two spaces away."
-        );
+        setFeedbackMessage("Invalid jump distance.");
         setSelectedPeg(null);
       }
     } else {
       setSelectedPeg(null);
-      if (cellValue === 1)
-        setFeedbackMessage("Select a peg first to make a jump.");
+      if (cellValue === 1) setFeedbackMessage("Select a peg first.");
     }
   };
 
   const toggleHammerMode = () => {
     if (isGameWon || isGameLost) return;
-    if (globalHammersRemaining > 0) {
-      const newHammerModeState = !isHammerModeActive;
-      setIsHammerModeActive(newHammerModeState);
-      setSelectedPeg(null);
-      setFeedbackMessage(
-        newHammerModeState
-          ? `Hammer mode activated! Select a peg to remove. Hammers: ${globalHammersRemaining}`
-          : "Hammer mode deactivated."
-      );
-    } else {
+    const totalHammersPlayerHas =
+      levelFreeHammersRemaining + purchasedHammersAvailable;
+    console.log(
+      `Game.js: Toggling hammer. Level free: ${levelFreeHammersRemaining}, Purchased: ${purchasedHammersAvailable}, Total: ${totalHammersPlayerHas}`
+    );
+    if (!isHammerModeActive && totalHammersPlayerHas === 0) {
       setShowPurchaseHammerModal(true);
       setFeedbackMessage("No hammers left! Get more?");
+      return;
     }
+    const newModeState = !isHammerModeActive;
+    setIsHammerModeActive(newModeState);
+    setSelectedPeg(null);
+    setFeedbackMessage(
+      newModeState
+        ? `Hammer mode on! Click a peg. (Free: ${levelFreeHammersRemaining}, Purchased: ${purchasedHammersAvailable})`
+        : "Hammer mode off."
+    );
   };
 
   const handleResetLevel = () => {
+    console.log("Game.js: Reset Level button clicked.");
     initializeLevel(currentLevelIndex);
   };
 
@@ -264,27 +315,31 @@ function Game({
   };
 
   const handleUndoMove = () => {
-    if (isHammerModeActive) setIsHammerModeActive(false); // Deactivate hammer mode if undoing
+    if (isHammerModeActive) setIsHammerModeActive(false);
     if (history.length === 0) {
       setFeedbackMessage("No moves to undo.");
       return;
     }
     if (globalFreeUndosRemaining > 0) {
-      const consumed = onConsumeGlobalUndo();
-      if (consumed) {
+      const consumedUndo = onConsumeGlobalUndo();
+      if (consumedUndo) {
         const lastState = history[history.length - 1];
         setBoard(lastState.board.map((r) => [...r]));
         setPegsRemaining(lastState.pegsRemaining);
         setMovesCount(lastState.movesCount);
+        // Restore level-specific free hammers if the history item has it
+        if (lastState.levelFreeHammers !== undefined) {
+          setLevelFreeHammersRemaining(lastState.levelFreeHammers);
+          console.log(
+            "Game.js: Undid move, restored levelFreeHammers to",
+            lastState.levelFreeHammers
+          );
+        }
         setHistory((prevHistory) => prevHistory.slice(0, -1));
         setSelectedPeg(null);
         setIsGameWon(false);
         setIsGameLost(false);
-        setFeedbackMessage(
-          `Last move undone. Global free undos remaining: ${
-            globalFreeUndosRemaining - 1
-          }`
-        );
+        setFeedbackMessage("Last move undone.");
       }
     } else {
       setShowPurchaseUndoModal(true);
@@ -293,42 +348,31 @@ function Game({
   };
 
   if (!currentLevelData && currentLevelIndex >= allLevels.length) {
+    /* ... (All levels complete UI) ... */
     return (
       <div className="all-levels-complete">
         <h1>Amazing!</h1>
-        <p className="feedback-message success">
-          {feedbackMessage || "Congratulations! You've completed all levels!"}
-        </p>
-        <p>You have mastered the Peg Puzzle Cross!</p>
-        <button onClick={() => setCurrentLevelIndex(0)}>
-          Play Again From Level 1
-        </button>
+        <p>{feedbackMessage || "All levels complete!"}</p>
+        <button onClick={() => setCurrentLevelIndex(0)}>Play Again</button>
       </div>
     );
   }
   if (!currentLevelData) {
-    return (
-      <p className="feedback-message info">
-        Loading level or level not found...
-      </p>
-    );
+    /* ... (Loading UI) ... */
+    return <p className="feedback-message info">Loading level...</p>;
   }
 
-  const getFeedbackClass = () => {
-    if (isGameWon) return "success";
-    if (isGameLost) return "error";
-    if (selectedPeg || isHammerModeActive) return "info"; // Hammer mode can also show info
-    return "info";
-  };
-
-  const canUndo = history.length > 0 && !isGameWon && !isGameLost;
+  const getFeedbackClass = () =>
+    isGameWon ? "success" : isGameLost ? "error" : "info";
+  const totalAvailableHammers =
+    levelFreeHammersRemaining + purchasedHammersAvailable;
+  const hammerButtonText = `Hammer (${totalAvailableHammers})`;
   const undoButtonText =
     globalFreeUndosRemaining > 0
       ? `Undo (${globalFreeUndosRemaining})`
       : history.length > 0
       ? "Get Undos"
       : "Undo";
-  const hammerButtonText = `Hammer (${globalHammersRemaining})`;
 
   return (
     <div
@@ -339,8 +383,9 @@ function Game({
         levelDescription={currentLevelData.description}
         pegsRemaining={pegsRemaining}
         movesCount={movesCount}
+        // You can add levelFreeHammersRemaining here if you want to show it in GameInfo
+        // levelFreeHammersCount={levelFreeHammersRemaining}
       />
-
       <div className="powerup-controls">
         <button
           onClick={toggleHammerMode}
@@ -348,29 +393,27 @@ function Game({
           disabled={
             isGameWon ||
             isGameLost ||
-            (globalHammersRemaining === 0 && !isHammerModeActive)
+            (totalAvailableHammers === 0 && !isHammerModeActive)
           }
           title={
-            globalHammersRemaining > 0
+            totalAvailableHammers > 0
               ? "Activate Hammer Mode"
               : "Get More Hammers"
           }
         >
-          {/* <img src={hammerIcon} alt="" style={{width: '20px', marginRight: '5px'}} /> */}
           {hammerButtonText}
         </button>
       </div>
-
       <Board
         boardState={board}
         selectedPeg={selectedPeg}
         onCellClick={handleCellClick}
-        isHammerModeActive={isHammerModeActive} // Pass for potential cell styling
+        isHammerModeActive={isHammerModeActive}
       />
       <GameControls
         onReset={handleResetLevel}
         onUndo={handleUndoMove}
-        canUndo={canUndo}
+        canUndo={history.length > 0 && !isGameWon && !isGameLost}
         undoButtonText={undoButtonText}
         onNextLevel={handleNextLevel}
         canGoNext={isGameWon}
@@ -384,13 +427,12 @@ function Game({
           {feedbackMessage}
         </p>
       )}
-
-      {/* Undo Purchase Modal */}
       {showPurchaseUndoModal && (
         <div className="modal-overlay">
+          {" "}
           <div className="modal-content">
-            <h3>Need More Undos?</h3>
-            <p>You've used all your global free undos.</p>
+            <h3>Need Undos?</h3>
+            <p>Out of global free undos.</p>
             <div className="modal-actions">
               <button
                 onClick={() => {
@@ -399,7 +441,7 @@ function Game({
                 }}
                 className="button-primary"
               >
-                "Buy" More Undos
+                "Buy" Undos
               </button>
               <button onClick={() => setShowPurchaseUndoModal(false)}>
                 Cancel
@@ -408,13 +450,12 @@ function Game({
           </div>
         </div>
       )}
-
-      {/* Hammer Purchase Modal */}
       {showPurchaseHammerModal && (
         <div className="modal-overlay">
+          {" "}
           <div className="modal-content">
-            <h3>Need More Hammers?</h3>
-            <p>You're out of hammers!</p>
+            <h3>Need Hammers?</h3>
+            <p>Out of hammers!</p>
             <div className="modal-actions">
               <button
                 onClick={() => {
@@ -425,11 +466,6 @@ function Game({
               >
                 "Buy" 3 Hammers
               </button>
-              {/* Placeholder for "Watch Ad for Hammer"
-                <button onClick={() => { console.log('Watch ad for hammer clicked'); setShowPurchaseHammerModal(false); }}>
-                    Watch Ad for 1 Hammer
-                </button>
-                */}
               <button onClick={() => setShowPurchaseHammerModal(false)}>
                 Cancel
               </button>
@@ -437,25 +473,6 @@ function Game({
           </div>
         </div>
       )}
-
-      {/* Placeholder for Hammer Animation Element
-      {hammerAnimation.active && (
-        <div 
-            className="hammer-animation-sprite" 
-            style={{ 
-                position: 'absolute', 
-                top: `${hammerAnimation.targetRow * 50 + 25}px`, // Example positioning, adjust based on cell size/board offset
-                left: `${hammerAnimation.targetCol * 50 + 25}px`,
-                width: '50px', height: '50px', background: 'rgba(255,0,0,0.5)', // Replace with actual animation
-                pointerEvents: 'none',
-                transform: 'translate(-50%, -50%)' // Center it
-            }}
-            // onAnimationEnd={() => { ... actual peg removal and reset animation state ... }}
-        >
-            Hammer Anim!
-        </div>
-      )}
-      */}
     </div>
   );
 }

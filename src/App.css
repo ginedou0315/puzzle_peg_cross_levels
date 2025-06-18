@@ -396,9 +396,8 @@ footer p small {
 }
 
 /* Visual feedback when hammer mode is active */
-.game-area.hammer-mode-active .board {
-  /* Optional: Add a border or glow to the board */
-  /* box-shadow: 0 0 15px var(--peg-selected-color); */
+.game-area.hammer-mode-active.board {
+  box-shadow: 0 0 15px var(--peg-selected-color);
 }
 .game-area.hammer-mode-active .cell.has-peg .peg {
   cursor: crosshair; /* Change cursor over pegs in hammer mode */
